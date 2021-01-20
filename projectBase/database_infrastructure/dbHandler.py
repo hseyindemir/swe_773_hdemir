@@ -143,3 +143,24 @@ def getHighestSubredditsbyTopScore(keyword):
 
     except (Exception) as error:
         print("Error while connecting to PostgreSQL", error)
+
+def getTotalCount(table):
+    """
+    docstring
+    """
+    try:
+
+        connection = psycopg2.connect(user="postgres",
+                                      password="poc123",
+                                      host="localhost",
+                                      port=5555,
+                                      database="redditdb")
+
+        cursor = connection.cursor()
+        create_table_query = f'''select count(*) from {table}'''
+        cursor.execute(create_table_query)
+        records = cursor.fetchone()
+        return records
+
+    except (Exception) as error:
+        print("Error while connecting to PostgreSQL", error)

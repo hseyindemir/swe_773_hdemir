@@ -128,6 +128,17 @@ def get_subreddits_by_score(keyword):
     resultJsonParsed = json.dumps(resultSet, sort_keys=True, indent=4)
     return resultJsonParsed
 
+@app.route('/totalsinreddit/')
+def get_reddit_counts():
+    totalComments = dbController.getTotalCount('comments')
+    totalSubreddit = dbController.getTotalCount('subreddits')
+    countModel={
+        "totalComment": totalComments,
+        "totalSubreddit" : totalSubreddit
+    }
+    resultJsonParsed = json.dumps(countModel, sort_keys=True, indent=4)
+    return resultJsonParsed
+
 if __name__ == '__main__':
     SWAGGER_URL = '/api/docs'
     API_URL = 'http://localhost:5000'
