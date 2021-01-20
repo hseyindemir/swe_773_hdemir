@@ -13,6 +13,7 @@ CREATE TABLE public.comments (
     id varchar(1000),
     commentAuthor varchar(1000),
     commentLink varchar(1000),
+    commentBody varchar(4000),
     commentScore integer,
     commentDate bigint
 );
