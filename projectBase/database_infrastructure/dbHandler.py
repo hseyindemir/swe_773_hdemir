@@ -124,6 +124,48 @@ def getHighestSubredditsbyTopComments(keyword):
     except (Exception) as error:
         print("Error while connecting to PostgreSQL", error)
 
+def getSubRedditswhole(keyword):
+    """
+    docstring
+    """
+    try:
+
+        connection = psycopg2.connect(user="postgres",
+                                      password="poc123",
+                                      host="localhost",
+                                      port=5555,
+                                      database="redditdb")
+
+        cursor = connection.cursor()
+        create_table_query = f'''select topicTitle from subreddits where topicKeyword like '%{keyword}%'  ORDER BY numberofcomments DESC limit 5000'''
+        cursor.execute(create_table_query)
+        records = cursor.fetchall()
+        return records
+
+    except (Exception) as error:
+        print("Error while connecting to PostgreSQL", error)
+
+
+def getCommentwhole(keyword):
+    """
+    docstring
+    """
+    try:
+
+        connection = psycopg2.connect(user="postgres",
+                                      password="poc123",
+                                      host="localhost",
+                                      port=5555,
+                                      database="redditdb")
+
+        cursor = connection.cursor()
+        create_table_query = f'''select commentBody from comments where commentBody like '%{keyword}%' limit 5000'''
+        cursor.execute(create_table_query)
+        records = cursor.fetchall()
+        return records
+
+    except (Exception) as error:
+        print("Error while connecting to PostgreSQL", error)
 def getHighestSubredditsbyTopScore(keyword):
     """
     docstring
