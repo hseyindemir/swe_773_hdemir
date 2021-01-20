@@ -80,6 +80,7 @@ def comments_by_topic_default(keyword):
             "id" : topic.subreddit_id,
             "commentAuthor": str(topic.author),
             "commentLink": topic.permalink,
+            "commentBody": topic.body,
             "commentScore": topic.score,
             "commentDate": round((int(topic.created_utc)),0)
         }
@@ -101,6 +102,7 @@ def comments_by_topic(keyword, max):
             "id" : topic.subreddit_id,
             "commentAuthor": str(topic.author),
             "commentLink": topic.permalink,
+            "commentBody": topic.body,
             "commentScore": topic.score,
             "commentDate": round((int(topic.created_utc)),0)
         }
@@ -132,6 +134,17 @@ def get_subreddits_by_score(keyword):
 def get_reddit_counts():
     totalComments = dbController.getTotalCount('comments')
     totalSubreddit = dbController.getTotalCount('subreddits')
+    countModel={
+        "totalComment": totalComments,
+        "totalSubreddit" : totalSubreddit
+    }
+    resultJsonParsed = json.dumps(countModel, sort_keys=True, indent=4)
+    return resultJsonParsed
+
+@app.route('/totalsinredditfiltered/<string:keyword>')
+def get_reddit_counts_filtered(keyword):
+    totalComments = dbController.getTotalCountFilteredComments(keyword)
+    totalSubreddit = dbController.getTotalCountFilteredSubreddit(keyword)
     countModel={
         "totalComment": totalComments,
         "totalSubreddit" : totalSubreddit
