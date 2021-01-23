@@ -11,6 +11,9 @@ nltk.download('stopwords')
 from nltk.tokenize import word_tokenize
 from nltk.probability import FreqDist
 from textblob import TextBlob
+import background.collectSubRedditsforCovid as covidDailyJob
+import background.collectCommentsforCovid as covidDailyJobComments
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 
@@ -276,6 +279,8 @@ if __name__ == '__main__':
             'app_name': "Test application"
         },
     )
+    covidDailyJob.collectAsync()
+    covidDailyJobComments.collectAsyncComments()
 
     app.register_blueprint(swaggerui_blueprint)
     app.run(host="0.0.0.0", port=5000)
