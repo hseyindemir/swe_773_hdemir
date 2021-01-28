@@ -7,11 +7,14 @@ from nltk.tokenize import word_tokenize
 from flask import Flask, render_template
 from flask_swagger_ui import get_swaggerui_blueprint
 import praw
+import redditController.redditGate as redditControl
 import json
 import resources
 import database_infrastructure.dbHandler as dbController
+import sentiment.tokenizeController as wordTokenizer
 import nltk
 import string
+from flask_cors import CORS
 nltk.download('punkt')
 nltk.download('stopwords')
 
@@ -33,10 +36,8 @@ def welcome_render():
 
 @app.route('/populars/<string:keyword>/')
 def popular_by_word(keyword):
-    redditGate = praw.Reddit(client_id='GlQ2GmyaogYirw',
-                             client_secret='ee_qHpCcpcewxWdDu3cjniI55g8Ivg',
-                             user_agent='swe573')
-    topicList = redditGate.subreddit(keyword).hot(limit=19)
+    redditGate = redditControl.createRedditConnection()
+    topicList = redditGate.subreddit(keyword).top("all")
     resultSet = []
     for topic in topicList:
         topicRecord = {
@@ -57,9 +58,7 @@ def popular_by_word(keyword):
 
 @app.route('/populars/<string:keyword>/<int:max>')
 def popular_by_word_limit(keyword, max):
-    redditGate = praw.Reddit(client_id='GlQ2GmyaogYirw',
-                             client_secret='ee_qHpCcpcewxWdDu3cjniI55g8Ivg',
-                             user_agent='swe573')
+    redditGate = redditControl.createRedditConnection()
     topicList = redditGate.subreddit(keyword).hot(limit=max)
     resultSet = []
     for topic in topicList:
@@ -81,9 +80,7 @@ def popular_by_word_limit(keyword, max):
 
 @app.route('/comments/<string:keyword>/')
 def comments_by_topic_default(keyword):
-    redditGate = praw.Reddit(client_id='GlQ2GmyaogYirw',
-                             client_secret='ee_qHpCcpcewxWdDu3cjniI55g8Ivg',
-                             user_agent='swe573')
+    redditGate = redditControl.createRedditConnection()
     topicList = redditGate.subreddit(keyword).comments(limit=10)
     resultSet = []
     for topic in topicList:
@@ -104,9 +101,7 @@ def comments_by_topic_default(keyword):
 
 @app.route('/comments/<string:keyword>/<int:max>')
 def comments_by_topic(keyword, max):
-    redditGate = praw.Reddit(client_id='GlQ2GmyaogYirw',
-                             client_secret='ee_qHpCcpcewxWdDu3cjniI55g8Ivg',
-                             user_agent='swe573')
+    redditGate = redditControl.createRedditConnection()
     topicList = redditGate.subreddit(keyword).comments(limit=max)
     resultSet = []
     for topic in topicList:
@@ -146,9 +141,30 @@ def get_subreddits_by_comments(keyword):
 @app.route('/topsubredditsscore/<string:keyword>')
 def get_subreddits_by_score(keyword):
     resultSet = dbController.getHighestSubredditsbyTopScore(keyword)
-    resultJsonParsed = json.dumps(resultSet, sort_keys=True, indent=4)
-    return resultJsonParsed
+    
+    redditModel=[]
+    for record in resultSet:
+        topicModelRecord={
+            "topicTitle" : record[1],
+            "topicScore" : record[2]
+        }
+        redditModel.append(topicModelRecord)
+    redditModel = json.dumps(redditModel, sort_keys=True, indent=4)
+    return redditModel
 
+@app.route('/topupvotereddits/<string:keyword>')
+def get_subreddits_by_upvote(keyword):
+    resultSet = dbController.getHighestSubredditsbyTopUpvote(keyword)
+    
+    redditModel=[]
+    for record in resultSet:
+        topicModelRecord={
+            "topicTitle" : record[0],
+            "upvoteRatio" : record[1]
+        }
+        redditModel.append(topicModelRecord)
+    redditModel = json.dumps(redditModel, sort_keys=True, indent=4)
+    return redditModel
 
 @app.route('/totalsinreddit/')
 def get_reddit_counts():
@@ -164,81 +180,75 @@ def get_reddit_counts():
 
 @app.route('/totalsinredditfiltered/<string:keyword>')
 def get_reddit_counts_filtered(keyword):
+    from nltk.tokenize import sent_tokenize
     totalComments = dbController.getTotalCountFilteredComments(keyword)
     totalSubreddit = dbController.getTotalCountFilteredSubreddit(keyword)
+    resultSet = dbController.getSubRedditswhole(keyword)
+    resultSetJson = json.dumps(resultSet, sort_keys=True, indent=4)
+    tokenized_text = sent_tokenize(resultSetJson)
+    scoreAnalysis = []
+    for tex in tokenized_text:
+        analysis = TextBlob(tex).sentiment
+        sentimentRecord = {
+            "positivity": analysis[1],
+        }
+        scoreAnalysis.append(sentimentRecord)
+    totalLengt=len(scoreAnalysis)
+    totalValues=(sum(item['positivity'] for item in scoreAnalysis))
+    averageScore = totalValues/totalLengt
+    resultSet = dbController.getCommentwhole(keyword)
+    resultJsonParsed = json.dumps(resultSet, sort_keys=True, indent=4)
+    tokenized_text = sent_tokenize(resultJsonParsed)
+    scoreAnalysis = []
+    for tex in tokenized_text:
+        analysis = TextBlob(tex).sentiment
+        sentimentRecord = {
+            "positivity": analysis[1],
+        }
+        scoreAnalysis.append(sentimentRecord)
+    totalLengt=len(scoreAnalysis)
+    totalValues=(sum(item['positivity'] for item in scoreAnalysis))
+    averageScoreComment = (totalValues/totalLengt)
     countModel = {
         "totalComment": totalComments,
-        "totalSubreddit": totalSubreddit
+        "totalSubreddit": totalSubreddit,
+        "averageScore" : "{:.2f}".format(averageScore),
+        "averageScoreComment":  "{:.2f}".format(averageScoreComment)
+        
     }
     resultJsonParsed = json.dumps(countModel, sort_keys=True, indent=4)
     return resultJsonParsed
 
 
-@app.route('/mostsimilars/<string:keyword>')
+@app.route('/mostusedwordsinsubreddits/<string:keyword>')
 def get_most_pupulars(keyword):
     import nltk
     from nltk.corpus import stopwords
     resultSet = dbController.getSubRedditswhole(keyword)
     resultJsonParsed = json.dumps(resultSet, sort_keys=True, indent=4)
-    all_stopwords = stopwords.words('english')
-    all_stopwords.append('[')
-    all_stopwords.append(',')
-    all_stopwords.append(']')
-    all_stopwords.append('``')
-    all_stopwords.append("''")
-    all_stopwords.append('?')
-    all_stopwords.append('(')
-    all_stopwords.append(')')
-    all_stopwords.append(':')
-    all_stopwords.append('I')
-    all_stopwords.append('.')
-    all_stopwords.append('-')
-    all_stopwords.append("`")
-    all_stopwords.append("*")
-    all_stopwords.append("\\")
-    all_stopwords.append("...")
-    all_stopwords.append("\\n")
-    text_tokens = nltk.word_tokenize(resultJsonParsed)
-    tokens_without_sw = [
-        word for word in text_tokens if not word in all_stopwords]
-    print(tokens_without_sw)
+    tokens_without_sw=wordTokenizer.convertResultToToknizeFormat(resultJsonParsed)
     fdist = nltk.FreqDist(tokens_without_sw)
-    print(fdist.most_common(100))
-    resultJsonParsed2 = json.dumps(
-        fdist.most_common(100), sort_keys=True, indent=4)
-    return resultJsonParsed2
+    keywordList=[]
+    for record in fdist.most_common(10):
+        keywordRecord={
+            "keyword" : record[0],
+            "count" : record[1]
+        }
+        keywordList.append(keywordRecord)
+    keywordList=json.dumps(
+        keywordList, sort_keys=True, indent=4)
+        
+    return keywordList
 
 
-@app.route('/mostsimilarsComments/<string:keyword>')
+@app.route('/mostusedwordsincomments/<string:keyword>')
 def get_most_pupulars_comments(keyword):
     import nltk
     from nltk.corpus import stopwords
     resultSet = dbController.getCommentwhole(keyword)
     resultJsonParsed = json.dumps(resultSet, sort_keys=True, indent=4)
-    all_stopwords = stopwords.words('english')
-    all_stopwords.append('[')
-    all_stopwords.append(',')
-    all_stopwords.append(']')
-    all_stopwords.append('``')
-    all_stopwords.append("''")
-    all_stopwords.append('?')
-    all_stopwords.append('(')
-    all_stopwords.append(')')
-    all_stopwords.append(':')
-    all_stopwords.append('I')
-    all_stopwords.append('.')
-    all_stopwords.append('-')
-    all_stopwords.append("`")
-    all_stopwords.append("*")
-    all_stopwords.append("\\")
-    all_stopwords.append("...")
-    all_stopwords.append("\\n")
-    text_tokens = nltk.word_tokenize(resultJsonParsed)
-    tokens_without_sw = [
-        word for word in text_tokens if not word in all_stopwords]
-    print(tokens_without_sw)
+    tokens_without_sw=wordTokenizer.convertResultToToknizeFormat(resultJsonParsed)
     fdist = nltk.FreqDist(tokens_without_sw)
-    print(fdist.most_common(100))
     resultJsonParsed2 = json.dumps(
         fdist.most_common(100), sort_keys=True, indent=4)
     return resultJsonParsed2
@@ -295,6 +305,6 @@ if __name__ == '__main__':
     )
     covidDailyJob.collectAsync()
     covidDailyJobComments.collectAsyncComments()
-
+    CORS(app)
     app.register_blueprint(swaggerui_blueprint)
     app.run(host="0.0.0.0", port=5000)

@@ -1,5 +1,5 @@
 import psycopg2
-
+import database_infrastructure.dbConnectionHandler as postgresqlConnection
 
 def addRecordToSubreddits(subredditRecord):
     """
@@ -7,11 +7,7 @@ def addRecordToSubreddits(subredditRecord):
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
 
@@ -37,11 +33,7 @@ def addRecordToComments(commentRecord):
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
 
@@ -66,11 +58,7 @@ def addSearchRecord(search_keyword):
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
         create_table_query = f'''insert into search_requests (search_keyword) VALUES ('{search_keyword}')'''
@@ -88,11 +76,7 @@ def getHits():
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
         create_table_query = f'''select search_keyword,count(*) as totalCount from search_requests GROUP BY search_keyword order by totalCount DESC limit 10'''
@@ -109,11 +93,7 @@ def getHighestSubredditsbyTopComments(keyword):
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
         create_table_query = f'''select * from subreddits where topicKeyword like '%{keyword}%'  ORDER BY numberofcomments DESC limit 100'''
@@ -130,11 +110,7 @@ def getSubRedditswhole(keyword):
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
         create_table_query = f'''select topicTitle from subreddits where topicKeyword like '%{keyword}%'  ORDER BY numberofcomments DESC limit 5000'''
@@ -152,11 +128,7 @@ def getCommentwhole(keyword):
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
         create_table_query = f'''select commentBody from comments where commentBody like '%{keyword}%' limit 5000'''
@@ -172,14 +144,27 @@ def getHighestSubredditsbyTopScore(keyword):
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
-        create_table_query = f'''select * from subreddits where topicKeyword like '%{keyword}%'  ORDER BY topicScore DESC limit 100'''
+        create_table_query = f'''select * from subreddits where topicKeyword like '%{keyword}%'  ORDER BY topicScore DESC limit 10'''
+        cursor.execute(create_table_query)
+        records = cursor.fetchall()
+        return records
+
+    except (Exception) as error:
+        print("Error while connecting to PostgreSQL", error)
+
+def getHighestSubredditsbyTopUpvote(keyword):
+    """
+    docstring
+    """
+    try:
+
+        connection = postgresqlConnection.createConnectionToDatabase()
+
+        cursor = connection.cursor()
+        create_table_query = f'''select topicTitle,upVoteRatio from subreddits where topicKeyword like '%{keyword}%'  ORDER BY upVoteRatio DESC limit 11'''
         cursor.execute(create_table_query)
         records = cursor.fetchall()
         return records
@@ -193,11 +178,7 @@ def getTotalCount(table):
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
         create_table_query = f'''select count(*) from {table}'''
@@ -215,11 +196,7 @@ def getTotalCountFilteredComments(keyword):
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
         create_table_query = f'''select count(*) from comments where commentBody like '%{keyword}%' '''
@@ -237,11 +214,7 @@ def getTotalCountFilteredSubreddit(keyword):
     """
     try:
 
-        connection = psycopg2.connect(user="postgres",
-                                      password="poc123",
-                                      host="localhost",
-                                      port=5555,
-                                      database="redditdb")
+        connection = postgresqlConnection.createConnectionToDatabase()
 
         cursor = connection.cursor()
         create_table_query = f'''select count(*) from subreddits where topicTitle like '%{keyword}%' '''

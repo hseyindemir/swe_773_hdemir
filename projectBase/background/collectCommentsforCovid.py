@@ -7,7 +7,7 @@ def collectCommentsForCovid():
     redditGate = praw.Reddit(client_id='GlQ2GmyaogYirw',
                              client_secret='ee_qHpCcpcewxWdDu3cjniI55g8Ivg',
                              user_agent='swe573')
-    topicList = redditGate.comment('covid').controversial("day")
+    topicList = redditGate.comment('covid').controversial("week")
     for topic in topicList:
         topicRecord = {
             "id": topic.subreddit_id,
@@ -24,5 +24,5 @@ def collectCommentsForCovid():
 def collectAsyncComments():
     print("registering async background job")
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=collectCommentsForCovid, trigger="interval", days=1)
+    scheduler.add_job(func=collectCommentsForCovid, trigger="interval", minutes=1)
     scheduler.start()
