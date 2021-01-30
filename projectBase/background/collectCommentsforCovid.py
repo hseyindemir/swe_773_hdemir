@@ -24,5 +24,5 @@ def collectCommentsForCovid():
 def collectAsyncComments():
     print("registering async background job")
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=collectCommentsForCovid, trigger="interval", minutes=1)
+    scheduler.add_job(func=collectCommentsForCovid, trigger="interval", days=1)
     scheduler.start()

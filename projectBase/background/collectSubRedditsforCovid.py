@@ -13,5 +13,5 @@ def collectAsync():
     print("registering async background job")
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=collectSubredditsForCovid,
-                      trigger="interval", minutes=1)
+                      trigger="interval", days=1)
     scheduler.start()
