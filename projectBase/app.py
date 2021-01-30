@@ -8,6 +8,7 @@ from flask import Flask, render_template
 from flask_swagger_ui import get_swaggerui_blueprint
 import praw
 import redditController.redditGate as redditControl
+import redditController.populateSubredditToDb as redditLoader
 import json
 import resources
 import database_infrastructure.dbHandler as dbController
@@ -181,6 +182,7 @@ def get_reddit_counts():
 @app.route('/totalsinredditfiltered/<string:keyword>')
 def get_reddit_counts_filtered(keyword):
     from nltk.tokenize import sent_tokenize
+    redditLoader.populateSubReddit(keyword=keyword,max=1000)
     totalComments = dbController.getTotalCountFilteredComments(keyword)
     totalSubreddit = dbController.getTotalCountFilteredSubreddit(keyword)
     resultSet = dbController.getSubRedditswhole(keyword)
@@ -219,6 +221,80 @@ def get_reddit_counts_filtered(keyword):
     resultJsonParsed = json.dumps(countModel, sort_keys=True, indent=4)
     return resultJsonParsed
 
+@app.route('/totalsinredditv2/<string:keyword>')
+def get_reddit_totals_v2(keyword):
+    from nltk.tokenize import sent_tokenize
+    redditLoader.populateSubReddit(keyword=keyword,max=100)
+    totalComments = dbController.getTotalCountFilteredComments(keyword)
+    totalSubreddit = dbController.getTotalCountFilteredSubreddit(keyword)
+    resultSet = dbController.getSubRedditswhole(keyword)
+    resultSetJson = json.dumps(resultSet, sort_keys=True, indent=4)
+    resultSetHighReddit = dbController.getHighestSubredditsbyTopScore(keyword)
+    redditModel=[]
+    for record in resultSetHighReddit:
+        topicModelRecord={
+            "topicTitle" : record[1],
+            "topicScore" : record[2]
+        }
+        redditModel.append(topicModelRecord)
+    tokenized_text = sent_tokenize(resultSetJson)
+    scoreAnalysis = []
+    for tex in tokenized_text:
+        analysis = TextBlob(tex).sentiment
+        sentimentRecord = {
+            "positivity": analysis[1],
+        }
+        scoreAnalysis.append(sentimentRecord)
+    totalLengt=len(scoreAnalysis)
+    totalValues=(sum(item['positivity'] for item in scoreAnalysis))
+    averageScore = totalValues/totalLengt
+    resultSet = dbController.getCommentwhole(keyword)
+    resultJsonParsed = json.dumps(resultSet, sort_keys=True, indent=4)
+    tokenized_text = sent_tokenize(resultJsonParsed)
+    scoreAnalysis = []
+    for tex in tokenized_text:
+        analysis = TextBlob(tex).sentiment
+        sentimentRecord = {
+            "positivity": analysis[1],
+        }
+        scoreAnalysis.append(sentimentRecord)
+    totalLengt=len(scoreAnalysis)
+    totalValues=(sum(item['positivity'] for item in scoreAnalysis))
+    averageScoreComment = (totalValues/totalLengt)
+    resultSetUpvote = dbController.getHighestSubredditsbyTopUpvote(keyword)
+    
+    redditModelUpvote=[]
+    for record in resultSetUpvote:
+        topicModelRecord={
+            "topicTitle" : record[0],
+            "upvoteRatio" : record[1]
+        }
+        redditModelUpvote.append(topicModelRecord)
+    import nltk
+    from nltk.corpus import stopwords
+    resultSetFrequency = dbController.getSubRedditswhole(keyword)
+    resultJsonParsed2 = json.dumps(resultSetFrequency, sort_keys=True, indent=4)
+    tokens_without_sw=wordTokenizer.convertResultToToknizeFormat(resultJsonParsed2)
+    fdist = nltk.FreqDist(tokens_without_sw)
+    keywordList=[]
+    for record in fdist.most_common(10):
+        keywordRecord={
+            "keyword" : record[0],
+            "count" : record[1]
+        }
+        keywordList.append(keywordRecord)
+    countModel = {
+        "totalComment": totalComments,
+        "totalSubreddit": totalSubreddit,
+        "averageScore" : "{:.2f}".format(averageScore),
+        "averageScoreComment":  "{:.2f}".format(averageScoreComment),
+        "highReddits" : redditModel,
+        "upvoteReddits" : redditModelUpvote,
+        "keywordList" : keywordList
+        
+    }
+    resultJsonParsed = json.dumps(countModel, sort_keys=True, indent=4)
+    return resultJsonParsed
 
 @app.route('/mostusedwordsinsubreddits/<string:keyword>')
 def get_most_pupulars(keyword):
@@ -303,8 +379,8 @@ if __name__ == '__main__':
             'app_name': "Test application"
         },
     )
-    covidDailyJob.collectAsync()
-    covidDailyJobComments.collectAsyncComments()
+    #covidDailyJob.collectAsync()
+    #covidDailyJobComments.collectAsyncComments()
     CORS(app)
     app.register_blueprint(swaggerui_blueprint)
     app.run(host="0.0.0.0", port=5000)
