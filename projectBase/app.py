@@ -380,10 +380,8 @@ if __name__ == '__main__':
             'app_name': "Test application"
         },
     )
-    #covidDailyJob.collectAsync()
-    #covidDailyJobComments.collectAsyncComments()
-    #asyncio.run(redditLoader.populateFirstSubreddits('covid'))
-    #asyncio.run(redditLoader.populateFirstSubreddits('covid19'))
+    covidDailyJob.collectAsync()
+    covidDailyJobComments.collectAsyncComments()
     redditLoader.populateFirstSubreddits('covid')
     redditLoader.populateFirstSubreddits('covid19')
     redditLoader.populateFirstComments('covid')
