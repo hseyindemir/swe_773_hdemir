@@ -7,7 +7,7 @@ def createConnectionToDatabase():
     """
     connection = psycopg2.connect(user="postgres",
                                   password="poc123",
-                                  host="localhost",
-                                  port=5555,
+                                  host="reddit_db",
+                                  port=5432,
                                   database="redditdb")
     return connection

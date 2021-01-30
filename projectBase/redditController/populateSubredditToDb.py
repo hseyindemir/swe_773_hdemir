@@ -1,6 +1,7 @@
 import praw
 import database_infrastructure.dbHandler as dbController
 import redditController.redditGate as redditControl
+import asyncio
 def populateSubReddit(keyword, max):
     redditGate = redditControl.createRedditConnection()
     topicList = redditGate.subreddit(keyword).hot(limit=max)
@@ -20,7 +21,7 @@ def populateSubReddit(keyword, max):
     dbController.addSearchRecord(keyword)
 
 
-async def populateFirstSubreddits(keyword):
+def populateFirstSubreddits(keyword):
     redditGate = redditControl.createRedditConnection()
     topicList = redditGate.subreddit(keyword).hot(limit=10000)
     resultSet = []
@@ -36,4 +37,22 @@ async def populateFirstSubreddits(keyword):
         }
         resultSet.append(topicRecord)
         dbController.addRecordToSubreddits(topicRecord)
+    dbController.addSearchRecord(keyword)
+
+
+def populateFirstComments(keyword):
+    redditGate = redditControl.createRedditConnection()
+    topicList = redditGate.subreddit(keyword).comments(limit=10000)
+    resultSet = []
+    for topic in topicList:
+        topicRecord = {
+            "id": topic.subreddit_id,
+            "commentAuthor": str(topic.author),
+            "commentLink": topic.permalink,
+            "commentBody": topic.body,
+            "commentScore": topic.score,
+            "commentDate": round((int(topic.created_utc)), 0)
+        }
+        dbController.addRecordToComments(topicRecord)
+        resultSet.append(topicRecord)
     dbController.addSearchRecord(keyword)

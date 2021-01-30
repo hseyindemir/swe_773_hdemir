@@ -15,6 +15,7 @@ import database_infrastructure.dbHandler as dbController
 import sentiment.tokenizeController as wordTokenizer
 import nltk
 import string
+import asyncio
 from flask_cors import CORS
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -381,8 +382,11 @@ if __name__ == '__main__':
     )
     #covidDailyJob.collectAsync()
     #covidDailyJobComments.collectAsyncComments()
+    #asyncio.run(redditLoader.populateFirstSubreddits('covid'))
+    #asyncio.run(redditLoader.populateFirstSubreddits('covid19'))
     redditLoader.populateFirstSubreddits('covid')
     redditLoader.populateFirstSubreddits('covid19')
+    redditLoader.populateFirstComments('covid')
     CORS(app)
     app.register_blueprint(swaggerui_blueprint)
     app.run(host="0.0.0.0", port=5000)
