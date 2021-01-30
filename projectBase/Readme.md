@@ -98,7 +98,7 @@ docker run -dit --rm -p 3000:3000 --name swe573_fe swe573_fe:v2
 
 After installing the project you can use this frontend enpoint in order to test and see the application
 
-http://localhost:300/
+http://localhost:3000/
 
 
 
