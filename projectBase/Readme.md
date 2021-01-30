@@ -85,7 +85,13 @@ docker run -d --name reddit_db -p 5432:5432 reddit_pg_container
 docker build -t swe573_reddit:v3 .
 docker run -dit --rm -p 5000:5000 --name swe573_backend --link reddit_db swe573_reddit:v3
 ```
-
+* run the frontend
+  
+```sh
+cd swe_773_hdemir\frontend
+docker build -t swe573_fe:v2 .
+docker run -dit --rm -p 3000:3000 --name swe573_fe swe573_fe:v2
+```
 
 <!-- USAGE EXAMPLES -->
 ## Usage
