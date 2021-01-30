@@ -18,7 +18,7 @@ import { BarChart } from "recharts";
 import SimpleTable from "../pages/Table/BasicTables/SimpleTable"
 import StripedTable from "../pages/Table/BasicTables/StripedTable";
 
-const API_HOST = "http://localhost:5000/totalsinredditfiltered/covid";
+const API_HOST = "http://swe573_backend:5000/totalsinredditfiltered/covid";
 
 function DashboardPage() {
 

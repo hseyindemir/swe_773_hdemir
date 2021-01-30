@@ -33,7 +33,7 @@ import { BarChart, Bar, ResponsiveContainer, XAxis } from "recharts";
 import Paper from "@material-ui/core/Paper";
 import GlobalStyles from "../styles.scss";
 
-const API_HOST = "http://localhost:5000";
+const API_HOST = "http://swe573_backend:5000";
 
 
 function KeywordPage() {
