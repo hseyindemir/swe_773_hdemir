@@ -1,4 +1,4 @@
-# Install application via docker
+# SWE 573 Reddit Analyzer Software Solution Project
 
 
 
