@@ -226,6 +226,7 @@ def get_reddit_counts_filtered(keyword):
 def get_reddit_totals_v2(keyword):
     from nltk.tokenize import sent_tokenize
     redditLoader.populateSubReddit(keyword=keyword,max=100)
+    redditLoader.populateFirstComments(keyword=keyword)
     totalComments = dbController.getTotalCountFilteredComments(keyword)
     totalSubreddit = dbController.getTotalCountFilteredSubreddit(keyword)
     resultSet = dbController.getSubRedditswhole(keyword)
@@ -385,6 +386,7 @@ if __name__ == '__main__':
     redditLoader.populateFirstSubreddits('covid')
     redditLoader.populateFirstSubreddits('covid19')
     redditLoader.populateFirstComments('covid')
+    redditLoader.populateFirstComments('covid19')
     CORS(app)
     app.register_blueprint(swaggerui_blueprint)
     app.run(host="0.0.0.0", port=5000)

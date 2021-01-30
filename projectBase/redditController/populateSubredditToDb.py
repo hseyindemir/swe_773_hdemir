@@ -42,7 +42,7 @@ def populateFirstSubreddits(keyword):
 
 def populateFirstComments(keyword):
     redditGate = redditControl.createRedditConnection()
-    topicList = redditGate.subreddit(keyword).comments(limit=10000)
+    topicList = redditGate.subreddit(keyword).comments(limit=100)
     resultSet = []
     for topic in topicList:
         topicRecord = {
