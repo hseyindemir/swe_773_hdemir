@@ -27,7 +27,7 @@ const MonthlySales = ({ data, theme }) => {
   };
   
   function getSimilarKeywords() {
-    const API_HOST = "http://swe573_backend:5000/mostusedwordsinsubreddits/covid";
+    const API_HOST = "http://35.238.161.243:5000/mostusedwordsinsubreddits/covid";
     const [data, setData] = useState([]);
 
     // GET request function to your Mock API

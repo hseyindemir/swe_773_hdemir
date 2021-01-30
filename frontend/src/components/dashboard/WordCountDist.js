@@ -5,7 +5,7 @@ import GlobalStyles from "../../styles.scss";
 import { BarChart, Bar, ResponsiveContainer, XAxis } from "recharts";
 import { withStyles } from "@material-ui/core/styles";
 
-const API_HOST = "http://localhost:5000/mostusedwordsinsubreddits/covid";
+const API_HOST = "http://35.238.161.243:5000/mostusedwordsinsubreddits/covid";
 
 function App() {
 

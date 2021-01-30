@@ -90,4 +90,10 @@ docker build -t swe573_fe:v1 .
 docker run -it --rm -p 1337:80 sample:prod
 
 docker build -t swe573_fe:v1
-docker run -d -it  -p 80:80/tcp --name swe573_fe --link swe573_backend swe573_fe:v1
+docker run -d -it  -p 3000:3000 --name swe573_fe --link swe573_backend swe573_fe:v3
+
+
+docker build -t swe573_fe:v2 .
+
+
+docker run -dit --rm -p 3000:3000 --name swe573_fe swe573_fe:v3

@@ -19,7 +19,7 @@ const borderedTableStyle = theme => ({
   }
 });
 
-const API_HOST = "http://localhost:5000/mostsimilars/covid";
+const API_HOST = "http://35.238.161.243:5000/mostsimilars/covid";
 function App() {
 
 

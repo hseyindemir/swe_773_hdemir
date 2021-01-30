@@ -8,7 +8,7 @@ import BorderClear from "@material-ui/icons/BorderClear";
 import BorderOuter from "@material-ui/icons/BorderOuter";
 
 function covidData() {
-const API_HOST = "http://localhost:5000/topicsentiments/covid";
+const API_HOST = "http://35.238.161.243:5000/topicsentiments/covid";
 const [data, setData] = useState([]);
 
 // GET request function to your Mock API
