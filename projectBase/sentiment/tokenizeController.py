@@ -28,6 +28,10 @@ def convertResultToToknizeFormat(topicList):
     all_stopwords.append("!")
     all_stopwords.append("|")
     all_stopwords.append("&")
+    all_stopwords.append("The")
+    all_stopwords.append("the")
+    all_stopwords.append("A")
+    all_stopwords.append("a")
     text_tokens = nltk.word_tokenize(topicList)
     tokens_without_sw = [
         word for word in text_tokens if not word in all_stopwords]

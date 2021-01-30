@@ -182,7 +182,7 @@ def get_reddit_counts():
 @app.route('/totalsinredditfiltered/<string:keyword>')
 def get_reddit_counts_filtered(keyword):
     from nltk.tokenize import sent_tokenize
-    redditLoader.populateSubReddit(keyword=keyword,max=1000)
+    #redditLoader.populateSubReddit(keyword=keyword,max=1000)
     totalComments = dbController.getTotalCountFilteredComments(keyword)
     totalSubreddit = dbController.getTotalCountFilteredSubreddit(keyword)
     resultSet = dbController.getSubRedditswhole(keyword)
@@ -381,6 +381,8 @@ if __name__ == '__main__':
     )
     #covidDailyJob.collectAsync()
     #covidDailyJobComments.collectAsyncComments()
+    redditLoader.populateFirstSubreddits('covid')
+    redditLoader.populateFirstSubreddits('covid19')
     CORS(app)
     app.register_blueprint(swaggerui_blueprint)
     app.run(host="0.0.0.0", port=5000)
